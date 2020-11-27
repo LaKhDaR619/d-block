@@ -1,16 +1,11 @@
 import React from "react";
 import "./title.css";
 
-function Title({ items, setItems, titleRef }) {
+function Title({ items, setItems, titleRef, refs }) {
   const handleTitleKeyUp = (e) => {
-    if (e.keyCode === 13) {
-      const newItems = [...items];
-      newItems[0].focused = true;
-      setItems(newItems);
-    }
-    // key down
-    else if (e.keyCode === 40) {
-      //
+    // enter or key down
+    if (e.keyCode === 13 || e.keyCode === 40) {
+      refs.current[0].focus();
     }
   };
 

@@ -5,12 +5,13 @@ import _uniqueId from "lodash/uniqueId";
 import Title from "../title";
 import Block from "../block";
 import MyMenu from "../menu";
-
-import { focuseByRef } from "../shared/handlers";
+import { isFocused } from "../block/handlers";
 
 export default function Editor() {
   const refs = useRef([]);
   const titleRef = useRef();
+  // menu
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const [items, setItems] = useState([
     {
@@ -22,19 +23,11 @@ export default function Editor() {
     },
   ]);
 
-  useEffect(() => {
-    const focusedItem = items.find((item) => item.focused);
-    if (focusedItem) {
-      const focusedRef = refs.current.find(
-        (ref) => ref.getAttribute("data-id") === focusedItem.id
-      );
-      focuseByRef(focusedRef);
-    }
-  }, [items]);
+  useEffect(() => {}, [items]);
 
   return (
     <>
-      <Title titleRef={titleRef} items={items} setItems={setItems} />
+      <Title titleRef={titleRef} refs={refs} />
       {items.map((item, index) => (
         <Block
           key={item.id}
@@ -43,9 +36,15 @@ export default function Editor() {
           setItems={setItems}
           refs={refs}
           titleRef={titleRef}
+          setAnchorEl={setAnchorEl}
         />
       ))}
-      <MyMenu items={items} setItems={setItems} />
+      <MyMenu
+        items={items}
+        setItems={setItems}
+        anchorEl={anchorEl}
+        setAnchorEl={setAnchorEl}
+      />
     </>
   );
 }

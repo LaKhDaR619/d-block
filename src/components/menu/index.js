@@ -1,15 +1,17 @@
-import React, { useState } from "react";
-import { MenuItem, Menu, Checkbox } from "@material-ui/core";
+import React from "react";
+import { MenuItem, Menu } from "@material-ui/core";
 
-import { handleClose } from "../shared/handlers";
+import { handleClose } from "./handlers";
+import { ITEMS } from "./constants";
 
-function MyMenu({ items, setItems }) {
-  // menu
-  const [anchorEl, setAnchorEl] = useState(null);
+function MyMenu({ items, setItems, anchorEl, setAnchorEl }) {
+  const { CHECKBOX, LIST_ITEM } = ITEMS;
+  const styles = {
+    listItemStyle: { fontSize: 25, margin: "auto", paddingRight: 10 },
+  };
 
   return (
     <Menu
-      id="simple-menu"
       anchorEl={anchorEl}
       keepMounted
       open={Boolean(anchorEl)}
@@ -20,17 +22,15 @@ function MyMenu({ items, setItems }) {
     >
       <MenuItem
         onClick={() =>
-          handleClose(<Checkbox />, items, setItems, anchorEl, setAnchorEl)
+          handleClose(CHECKBOX(), items, setItems, anchorEl, setAnchorEl)
         }
       >
-        <Checkbox checked={false} />
+        {CHECKBOX(false)}
       </MenuItem>
       <MenuItem
         onClick={() =>
           handleClose(
-            <span style={{ fontSize: 25, margin: "auto", paddingRight: 10 }}>
-              •
-            </span>,
+            LIST_ITEM(styles.listItemStyle),
             items,
             setItems,
             anchorEl,
@@ -38,7 +38,7 @@ function MyMenu({ items, setItems }) {
           )
         }
       >
-        <span style={{ fontSize: 25, margin: "auto" }}>•</span>
+        {LIST_ITEM({ fontSize: 25, margin: "auto", paddingRight: 10 })}
       </MenuItem>
     </Menu>
   );

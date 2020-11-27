@@ -3,3 +3,9 @@
   justify-content: center;
   align-items: center;
 }
+
+.input {
+  width: 100%;
+  border: 0;
+  font-size: 16px;
+}
