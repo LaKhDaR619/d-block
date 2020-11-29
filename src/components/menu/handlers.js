@@ -10,7 +10,7 @@ export const handleClose = (
   if (!extra) return;
 
   const index = blocks.findIndex(
-    (item) => item.id === anchorEl.getAttribute("data-id")
+    (block) => block.id === anchorEl.getAttribute("data-id")
   );
 
   const newItems = [...blocks];

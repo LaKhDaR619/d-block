@@ -24,12 +24,21 @@ export const handleChange = (index, event, blocks, setBlocks) => {
 };
 
 export const handleFocuse = (index, focused, blocks, setBlocks) => {
-  console.log(`${index}: ${focused ? "focused" : "blured"}`);
-  const newBlocks = [...blocks];
+  let newBlocks = [...blocks];
   const selectedBlock = { ...blocks[index] };
 
-  selectedBlock.focused = focused;
-  newBlocks[index] = selectedBlock;
+  // we have a problem with uodating the state twice, react only takes the last update
+  // so i'm working around it by setting all other blocks to !focused
+  if (focused) {
+    newBlocks = newBlocks.map((block) => {
+      block.focused = block.id === selectedBlock.id;
+
+      return block;
+    });
+  } else {
+    selectedBlock.focused = focused;
+    newBlocks[index] = selectedBlock;
+  }
 
   setBlocks(newBlocks);
 };

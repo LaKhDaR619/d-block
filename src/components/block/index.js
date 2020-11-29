@@ -55,6 +55,7 @@ function Block({ index, blocks, setBlocks, refs, titleRef, setAnchorEl }) {
         }
         className="block"
         contentEditable
+        data-id={block.id}
         //placeholder={blocks.length === 1 ? "Type '/' fro more" : ""}
       ></div>
     </div>
