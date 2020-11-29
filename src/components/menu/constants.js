@@ -2,5 +2,9 @@ import { Checkbox } from "@material-ui/core";
 
 export const ITEMS = {
   CHECKBOX: (checked, style) => <Checkbox checked={checked} style={style} />,
-  LIST_ITEM: (style) => <span style={style}>•</span>,
+  BULLETED_LIST: (style) => <span style={style}>•</span>,
+  NUMBERED_LIST: () => 1,
+  H1: () => "H1",
+  H2: () => "H2",
+  H3: () => "H3",
 };

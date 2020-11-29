@@ -15,6 +15,7 @@ export default function Editor() {
   const [blocks, setBlocks] = useState([
     {
       id: _uniqueId("prefix-"),
+      Type: "p",
       value: "",
       style: "",
       focused: true,

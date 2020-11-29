@@ -84,7 +84,7 @@ export const handleKeyUp = (
 
   switch (event.keyCode) {
     case ENTER_KEY:
-      handleEnterKey(index, newBlocks, setBlocks);
+      handleEnterKey(index, newBlocks, setBlocks, refs);
       break;
     case BACK_KEY:
       handleBackKey(index, newBlocks, setBlocks, refs, titleRef, prev_value);
@@ -111,10 +111,10 @@ export const handleKeyUp = (
 };
 
 // handling key Ups
-const handleEnterKey = (index, blocks, setBlocks) => {
+const handleEnterKey = (index, blocks, setBlocks, refs) => {
   const newBlocks = [...blocks];
   const selectedBlock = { ...newBlocks[index] };
-  const { value, extra } = selectedBlock;
+  let { value, extra } = selectedBlock;
 
   // in case we have extra and the value is empty
   // we don't add an item and just remove the extra and return
@@ -124,9 +124,15 @@ const handleEnterKey = (index, blocks, setBlocks) => {
     return setBlocks(newBlocks);
   }
 
+  // if it's a numbered list we add to it
+  if (!isNaN(extra)) {
+    extra += 1;
+  }
+
   // if we have a value, we add a new Block
   const newInput = {
     id: _uniqueId("prefix-"),
+    Type: "p",
     value: "",
     style: "",
     focused: true,

@@ -5,9 +5,15 @@ import { handleClose } from "./handlers";
 import { ITEMS } from "./constants";
 
 function MyMenu({ blocks, setBlocks, anchorEl, setAnchorEl }) {
-  const { CHECKBOX, LIST_ITEM } = ITEMS;
+  const { CHECKBOX, BULLETED_LIST, NUMBERED_LIST, H1, H2, H3 } = ITEMS;
   const styles = {
     listItemStyle: { fontSize: 25, margin: "auto", paddingRight: 10 },
+  };
+
+  const selectedData = { Type: "p", value: "", extra: null };
+
+  const selectItem = (selectedData) => {
+    handleClose(selectedData, blocks, setBlocks, anchorEl, setAnchorEl);
   };
 
   return (
@@ -15,32 +21,44 @@ function MyMenu({ blocks, setBlocks, anchorEl, setAnchorEl }) {
       anchorEl={anchorEl}
       keepMounted
       open={Boolean(anchorEl)}
-      onClose={() =>
-        handleClose(null, blocks, setBlocks, anchorEl, setAnchorEl)
-      }
+      onClose={() => handleClose(null)}
       style={{
         top: 40,
       }}
     >
       <MenuItem
-        onClick={() =>
-          handleClose(CHECKBOX(), blocks, setBlocks, anchorEl, setAnchorEl)
-        }
+        onClick={() => selectItem({ ...selectedData, extra: CHECKBOX() })}
       >
         {CHECKBOX(false)}
       </MenuItem>
       <MenuItem
         onClick={() =>
-          handleClose(
-            LIST_ITEM(styles.listItemStyle),
-            blocks,
-            setBlocks,
-            anchorEl,
-            setAnchorEl
-          )
+          selectItem({
+            ...selectedData,
+            extra: BULLETED_LIST(styles.listItemStyle),
+          })
         }
       >
-        {LIST_ITEM({ fontSize: 25, margin: "auto", paddingRight: 10 })}
+        {BULLETED_LIST({ fontSize: 25, margin: "auto", paddingRight: 10 })}
+      </MenuItem>
+      <MenuItem
+        onClick={() =>
+          selectItem({
+            ...selectedData,
+            extra: NUMBERED_LIST(),
+          })
+        }
+      >
+        {NUMBERED_LIST()}
+      </MenuItem>
+      <MenuItem onClick={() => selectItem({ ...selectedData, Type: H1() })}>
+        {H1()}
+      </MenuItem>
+      <MenuItem onClick={() => selectItem({ ...selectedData, Type: H2() })}>
+        {H2()}
+      </MenuItem>
+      <MenuItem onClick={() => selectItem({ ...selectedData, Type: H3() })}>
+        {H3()}
       </MenuItem>
     </Menu>
   );
