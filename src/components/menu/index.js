@@ -4,7 +4,7 @@ import { MenuItem, Menu } from "@material-ui/core";
 import { handleClose } from "./handlers";
 import { ITEMS } from "./constants";
 
-function MyMenu({ items, setItems, anchorEl, setAnchorEl }) {
+function MyMenu({ blocks, setBlocks, anchorEl, setAnchorEl }) {
   const { CHECKBOX, LIST_ITEM } = ITEMS;
   const styles = {
     listItemStyle: { fontSize: 25, margin: "auto", paddingRight: 10 },
@@ -15,14 +15,16 @@ function MyMenu({ items, setItems, anchorEl, setAnchorEl }) {
       anchorEl={anchorEl}
       keepMounted
       open={Boolean(anchorEl)}
-      onClose={() => handleClose(null, items, setItems, anchorEl, setAnchorEl)}
+      onClose={() =>
+        handleClose(null, blocks, setBlocks, anchorEl, setAnchorEl)
+      }
       style={{
         top: 40,
       }}
     >
       <MenuItem
         onClick={() =>
-          handleClose(CHECKBOX(), items, setItems, anchorEl, setAnchorEl)
+          handleClose(CHECKBOX(), blocks, setBlocks, anchorEl, setAnchorEl)
         }
       >
         {CHECKBOX(false)}
@@ -31,8 +33,8 @@ function MyMenu({ items, setItems, anchorEl, setAnchorEl }) {
         onClick={() =>
           handleClose(
             LIST_ITEM(styles.listItemStyle),
-            items,
-            setItems,
+            blocks,
+            setBlocks,
             anchorEl,
             setAnchorEl
           )

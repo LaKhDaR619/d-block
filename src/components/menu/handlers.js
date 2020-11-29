@@ -1,13 +1,19 @@
-export const handleClose = (extra, items, setItems, anchorEl, setAnchorEl) => {
+export const handleClose = (
+  extra,
+  blocks,
+  setBlocks,
+  anchorEl,
+  setAnchorEl
+) => {
   setAnchorEl(null);
   // if nothing is chosen
   if (!extra) return;
 
-  const index = items.findIndex(
+  const index = blocks.findIndex(
     (item) => item.id === anchorEl.getAttribute("data-id")
   );
 
-  const newItems = [...items];
+  const newItems = [...blocks];
   const selectedItem = { ...newItems[index] };
 
   selectedItem.extra = extra;
@@ -16,5 +22,5 @@ export const handleClose = (extra, items, setItems, anchorEl, setAnchorEl) => {
 
   newItems[index] = selectedItem;
 
-  setItems(newItems);
+  setBlocks(newItems);
 };

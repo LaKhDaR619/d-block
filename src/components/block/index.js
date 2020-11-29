@@ -4,30 +4,36 @@ import { IconButton } from "@material-ui/core";
 import MoreVertIcon from "@material-ui/icons/MoreVert";
 import AddIcon from "@material-ui/icons/Add";
 
-import { handleKeyUp, handleChange, handleFocuse, addSlash } from "./handlers";
+import { handleKeyUp, handleKeyDown, handleFocuse, addSlash } from "./handlers";
 
-function Block({ index, items, setItems, refs, titleRef, setAnchorEl }) {
-  const item = items[index];
+function Block({ index, blocks, setBlocks, refs, titleRef, setAnchorEl }) {
+  const block = blocks[index];
+
   const addButtonStyle = {
-    opacity: item.focused ? 1 : 0,
-    pointerEvents: item.focused ? "auto" : "none",
+    opacity: block.focused ? 1 : 0,
+    pointerEvents: block.focused ? "auto" : "none",
   };
 
   const addRefs = (el) => {
-    if (el && !refs.current.includes(el)) {
+    const refAdded = refs.current.find((ref) => ref.el === el);
+
+    if (el && !refAdded) {
       // adding and focusing the new element
       el.focus();
-      refs.current.splice(index, 0, el);
+      refs.current.splice(index, 0, {
+        el,
+        cursorInfo: { node: el.childNodes[0], offSet: 0 },
+      });
     }
   };
 
   return (
     <div
       className="input-container"
-      onFocus={() => handleFocuse(index, true, items, setItems)}
-      onBlur={() => handleFocuse(index, false, items, setItems)}
+      onFocus={() => handleFocuse(index, true, blocks, setBlocks)}
+      onBlur={() => handleFocuse(index, false, blocks, setBlocks)}
     >
-      {item.value || item.extra ? (
+      {block.value || block.extra ? (
         <IconButton size="small" className="iconButton">
           <MoreVertIcon />
         </IconButton>
@@ -35,27 +41,22 @@ function Block({ index, items, setItems, refs, titleRef, setAnchorEl }) {
         <IconButton
           size="small"
           style={addButtonStyle}
-          onClick={() => addSlash(index, items, setItems, refs, setAnchorEl)}
+          onClick={() => addSlash(index, blocks, setBlocks, refs, setAnchorEl)}
         >
           <AddIcon />
         </IconButton>
       )}
-      {item.extra}
-      <input
+      {block.extra}
+      <div
         ref={addRefs}
+        onKeyDown={handleKeyDown}
         onKeyUp={(e) =>
-          handleKeyUp(index, e, items, setItems, titleRef, refs, setAnchorEl)
+          handleKeyUp(index, e, blocks, setBlocks, titleRef, refs, setAnchorEl)
         }
-        onChange={(e) =>
-          handleChange(index, e, items, setItems, setAnchorEl, refs)
-        }
-        tabIndex={index}
-        className="input"
-        placeholder={items.length === 1 ? "Type '/' fro more" : ""}
-        value={item.value}
-        autoComplete="off"
-        data-id={item.id}
-      />
+        className="block"
+        contentEditable
+        //placeholder={blocks.length === 1 ? "Type '/' fro more" : ""}
+      ></div>
     </div>
   );
 }

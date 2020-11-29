@@ -5,7 +5,6 @@ import _uniqueId from "lodash/uniqueId";
 import Title from "../title";
 import Block from "../block";
 import MyMenu from "../menu";
-import { isFocused } from "../block/handlers";
 
 export default function Editor() {
   const refs = useRef([]);
@@ -13,35 +12,43 @@ export default function Editor() {
   // menu
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const [items, setItems] = useState([
+  const [blocks, setBlocks] = useState([
     {
       id: _uniqueId("prefix-"),
       value: "",
+      style: "",
       focused: true,
       readyToDelete: true,
       extra: null,
     },
   ]);
 
-  useEffect(() => {}, [items]);
+  useEffect(() => {
+    let info = "";
+
+    blocks.map((block, index) => (info += `${index}: ${block.focused}\n`));
+    //console.log(info);
+  }, [blocks]);
 
   return (
     <>
       <Title titleRef={titleRef} refs={refs} />
-      {items.map((item, index) => (
+      <button onClick={() => document.execCommand("bold")}>Bold</button>
+      <button onClick={() => document.execCommand("italic")}>Italic</button>
+      {blocks.map((item, index) => (
         <Block
           key={item.id}
           index={index}
-          items={items}
-          setItems={setItems}
+          blocks={blocks}
+          setBlocks={setBlocks}
           refs={refs}
           titleRef={titleRef}
           setAnchorEl={setAnchorEl}
         />
       ))}
       <MyMenu
-        items={items}
-        setItems={setItems}
+        blocks={blocks}
+        setBlocks={setBlocks}
         anchorEl={anchorEl}
         setAnchorEl={setAnchorEl}
       />

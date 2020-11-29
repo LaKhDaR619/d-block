@@ -1,57 +1,100 @@
 import _uniqueId from "lodash/uniqueId";
 
+import { focuseByCursorPosition } from "../shared/helpers";
+
 const ENTER_KEY = 13;
 const BACK_KEY = 8;
 const FORWARD_SLASH_KEY = 111;
+const UP_ARROW_KEY = 38;
+const DOWN_ARROW_KEY = 40;
 
-export const handleChange = (index, event, items, setItems) => {
+export const handleChange = (index, event, blocks, setBlocks) => {
   const { value } = event.target;
 
   // spreading the array and the object
-  const newItems = [...items];
-  const item = { ...items[index] };
+  const newBlocks = [...blocks];
+  const selectedBlock = { ...blocks[index] };
 
-  //if (value === "/" && !item.extra) setAnchorEl(refs.current[index]);
+  selectedBlock.value = value;
+  selectedBlock.readyToDelete = false;
 
-  item.value = value;
-  item.readyToDelete = false;
+  newBlocks[index] = selectedBlock;
 
-  newItems[index] = item;
-
-  setItems(newItems);
+  setBlocks(newBlocks);
 };
 
-export const handleFocuse = (index, focused, items, setItems) => {
-  const newItems = [...items];
-  const item = { ...items[index] };
+export const handleFocuse = (index, focused, blocks, setBlocks) => {
+  console.log(`${index}: ${focused ? "focused" : "blured"}`);
+  const newBlocks = [...blocks];
+  const selectedBlock = { ...blocks[index] };
 
-  item.focused = focused;
-  newItems[index] = item;
+  selectedBlock.focused = focused;
+  newBlocks[index] = selectedBlock;
 
-  setItems(newItems);
+  setBlocks(newBlocks);
 };
 
-export const addSlash = (index, items, setItems, refs, setAnchorEl) =>
-  handleForwardSlashKey(index, items, setItems, refs, setAnchorEl, true);
+export const addSlash = (index, blocks, setBlocks, refs, setAnchorEl) =>
+  handleForwardSlashKey(index, blocks, setBlocks, refs, setAnchorEl, true);
+
+export const handleKeyDown = (event) => {
+  // so the browser doesn't add a <br />
+  if ([13, 38, 40].includes(event.keyCode)) event.preventDefault();
+};
 
 export const handleKeyUp = (
   index,
   event,
-  items,
-  setItems,
+  blocks,
+  setBlocks,
   titleRef,
   refs,
   setAnchorEl
 ) => {
+  event.preventDefault();
+
+  // working as handleChange
+  const newBlocks = [...blocks];
+  const selectedBlock = { ...newBlocks[index] };
+  // storing the Prev value so we allow for empty values
+  const prev_value = selectedBlock.value;
+  selectedBlock.value = event.target.innerHTML;
+  selectedBlock.readyToDelete = false;
+  newBlocks[index] = selectedBlock;
+
+  setBlocks(newBlocks);
+  // end handle Change
+
+  // set focused node and the cursor offset
+  const sel = window.getSelection();
+  const node = sel.anchorNode;
+  const offSet = sel.rangeCount > 0 ? sel.getRangeAt(0).startOffset : -1;
+
+  if (offSet !== -1) refs.current[index].cursorInfo = { node, offSet };
+  //
+
   switch (event.keyCode) {
     case ENTER_KEY:
-      handleEnterKey(index, items, setItems);
+      handleEnterKey(index, newBlocks, setBlocks);
       break;
     case BACK_KEY:
-      handleBackKey(index, items, setItems, refs, titleRef);
+      handleBackKey(index, newBlocks, setBlocks, refs, titleRef, prev_value);
       break;
     case FORWARD_SLASH_KEY:
-      handleForwardSlashKey(index, items, setItems, refs, setAnchorEl, false);
+      handleForwardSlashKey(
+        index,
+        newBlocks,
+        setBlocks,
+        refs,
+        setAnchorEl,
+        false
+      );
+      break;
+    case UP_ARROW_KEY:
+      handleUpArrowKey(index, refs, titleRef);
+      break;
+    case DOWN_ARROW_KEY:
+      handleDownArrowKey(index, refs);
       break;
     default:
       return;
@@ -59,82 +102,82 @@ export const handleKeyUp = (
 };
 
 // handling key Ups
-const handleEnterKey = (index, items, setItems) => {
-  const newItems = [...items];
-  const selectedItem = { ...newItems[index] };
-  const { value, extra } = selectedItem;
+const handleEnterKey = (index, blocks, setBlocks) => {
+  const newBlocks = [...blocks];
+  const selectedBlock = { ...newBlocks[index] };
+  const { value, extra } = selectedBlock;
 
+  // in case we have extra and the value is empty
+  // we don't add an item and just remove the extra and return
+  if (extra && !value) {
+    selectedBlock.extra = null;
+    newBlocks[index] = selectedBlock;
+    return setBlocks(newBlocks);
+  }
+
+  // if we have a value, we add a new Block
   const newInput = {
     id: _uniqueId("prefix-"),
     value: "",
+    style: "",
     focused: true,
     readyToDelete: true,
     extra: extra,
   };
 
-  // in case we have extra and the value is empty
-  // we don't add an item and just remove the extra and return
-  if (extra && !value) {
-    selectedItem.extra = null;
-    newItems[index] = selectedItem;
-    return setItems(newItems);
-  }
+  selectedBlock.focused = false;
+  newBlocks[index] = selectedBlock;
+  newBlocks.splice(index + 1, 0, newInput);
 
-  // if we have a value
-  selectedItem.focused = false;
-  newItems[index] = selectedItem;
-  newItems.splice(index + 1, 0, newInput);
-
-  setItems(newItems);
+  setBlocks(newBlocks);
 };
 
-const handleBackKey = (index, items, setItems, refs, titleRef) => {
-  const newItems = [...items];
-  const selectedItem = { ...newItems[index] };
-  const { value, extra } = selectedItem;
+const handleBackKey = (
+  index,
+  blocks,
+  setBlocks,
+  refs,
+  titleRef,
+  prev_value
+) => {
+  if (!["<br>", ""].includes(prev_value)) return;
 
-  // we don't delete directly because the value at first is empty
-  // and we want to allow for empty inputs
-  if (selectedItem.readyToDelete) {
-    // if there is an extra we just remove it
-    if (extra) {
-      selectedItem.extra = null;
-      newItems[index] = selectedItem;
+  const newBlocks = [...blocks];
+  const selectedBlock = { ...newBlocks[index] };
+  const { extra } = selectedBlock;
 
-      setItems(newItems);
-      return;
-    }
+  if (extra) {
+    selectedBlock.extra = null;
+    newBlocks[index] = selectedBlock;
 
-    // we always leave at least one item
-    if (newItems.length === 1) {
-      titleRef.current.focus();
-      return;
-    }
-
-    // delete The Item
-    newItems.splice(index, 1);
-    // delete The Ref
-    refs.current.splice(index, 1);
-
-    if (index > 0) refs.current[index - 1].focus();
-    else if (index === 0) titleRef.current.focus();
-
-    setItems(newItems);
+    setBlocks(newBlocks);
+    return;
   }
-  // if the value just became '' we don't delete the block directly
-  // so the user can have empty valued blocks
-  else if (value === "") {
-    // put the ready to Delete flag
-    selectedItem.readyToDelete = true;
-    newItems[index] = selectedItem;
-    setItems(newItems);
+
+  // we always leave at least one item
+  if (newBlocks.length === 1) {
+    focuseByCursorPosition(
+      titleRef.current.childNodes[0],
+      titleRef.current.innerHTML.length
+    );
+    return;
   }
+
+  // delete The Item
+  newBlocks.splice(index, 1);
+  // delete The Ref
+  refs.current.splice(index, 1);
+
+  // don't repeat the work, the same as pressing up key
+  handleUpArrowKey(index, refs, titleRef);
+
+  setBlocks(newBlocks);
 };
 
 const handleForwardSlashKey = (
   index,
-  items,
-  setItems,
+  blocks,
+  setBlocks,
   refs,
   setAnchorEl,
   ignorValue
@@ -142,17 +185,37 @@ const handleForwardSlashKey = (
   if (ignorValue) {
     // if ignore value, that means we want to open the menu using the button
     // we simply add a '/' and show the menu
-    const newItems = [...items];
+    const newItems = [...blocks];
     const selectedItem = { ...newItems[index] };
 
     selectedItem.value = "/";
     newItems[index] = selectedItem;
 
-    setItems(newItems);
-    setAnchorEl(refs.current[index]);
+    setBlocks(newItems);
+    setAnchorEl(refs.current[index].el);
   } else {
     // else if we came from the keyup function then we check the value
-    const { value } = items[index];
-    if (value === "/") setAnchorEl(refs.current[index]);
+    const { value } = blocks[index];
+    if (value === "/") setAnchorEl(refs.current[index].el);
+  }
+};
+
+const handleUpArrowKey = (index, refs, titleRef) => {
+  if (index === 0)
+    focuseByCursorPosition(
+      titleRef.current.childNodes[0],
+      titleRef.current.innerHTML.length
+    );
+  else
+    focuseByCursorPosition(
+      refs.current[index - 1].cursorInfo.node,
+      refs.current[index - 1].cursorInfo.offSet
+    );
+};
+const handleDownArrowKey = (index, refs) => {
+  if (index + 1 < refs.current.length) {
+    const { node, offSet } = refs.current[index + 1].cursorInfo;
+    console.log(node, offSet);
+    focuseByCursorPosition(node, offSet);
   }
 };
