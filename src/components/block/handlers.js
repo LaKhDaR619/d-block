@@ -130,9 +130,10 @@ const handleEnterKey = (index, blocks, setBlocks, refs) => {
 
     // changing the rest of the numbered lists
     for (let i = index + 1; i < newBlocks.length; i++) {
-      if (isNaN(newBlocks.extra)) break;
+      if (isNaN(newBlocks[i].extra)) break;
 
-      newBlocks[i].extra = newBlocks[i - 1].extra + 1;
+      if (i === index + 1) newBlocks[i].extra = newBlocks[i - 1].extra + 2;
+      else newBlocks[i].extra = newBlocks[i - 1].extra + 1;
     }
   }
 
