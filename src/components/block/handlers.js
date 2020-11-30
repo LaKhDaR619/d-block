@@ -23,13 +23,20 @@ export const handleChange = (index, event, blocks, setBlocks) => {
   setBlocks(newBlocks);
 };
 
-export const handleFocuse = (index, focused, blocks, setBlocks) => {
+export const handleFocuse = (
+  index,
+  focused,
+  blocks,
+  setBlocks,
+  lastFocused
+) => {
   let newBlocks = [...blocks];
   const selectedBlock = { ...blocks[index] };
 
   // we have a problem with uodating the state twice, react only takes the last update
   // so i'm working around it by setting all other blocks to !focused
   if (focused) {
+    lastFocused.current = index;
     newBlocks = newBlocks.map((block) => {
       block.focused = block.id === selectedBlock.id;
 
@@ -114,7 +121,7 @@ export const handleKeyUp = (
 const handleEnterKey = (index, blocks, setBlocks, refs) => {
   const newBlocks = [...blocks];
   const selectedBlock = { ...newBlocks[index] };
-  let { value, extra } = selectedBlock;
+  let { value, extra, type } = selectedBlock;
 
   // in case we have extra and the value is empty
   // we don't add an item and just remove the extra and return
@@ -140,7 +147,9 @@ const handleEnterKey = (index, blocks, setBlocks, refs) => {
   // if we have a value, we add a new Block
   const newInput = {
     id: _uniqueId("prefix-"),
-    Type: "p",
+    TAG: "p",
+    // if the type is a header we don't use it on the next block
+    type: type === "Header" ? "Paragraph" : type,
     value: "",
     style: "",
     focused: true,
@@ -213,6 +222,9 @@ const handleForwardSlashKey = (
 
     selectedItem.value = "/";
     newItems[index] = selectedItem;
+
+    // reseting the value innerHTML (using Refs)
+    refs.current[index].el.innerHTML = "/";
 
     setBlocks(newItems);
     setAnchorEl(refs.current[index].el);

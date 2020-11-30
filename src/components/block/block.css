@@ -1,10 +1,6 @@
 .input-container {
   display: flex;
-  justify-content: center;
   align-items: center;
-}
-
-.block {
-  width: 100%;
-  border: 0;
+  position: relative;
+  z-index: 10;
 }

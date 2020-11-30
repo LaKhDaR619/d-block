@@ -1,15 +1,15 @@
 export const handleClose = (
+  setAnchorEl,
   selectedData,
   blocks,
   setBlocks,
-  anchorEl,
-  setAnchorEl
+  anchorEl
 ) => {
   setAnchorEl(null);
   // if nothing is chosen
   if (!selectedData) return;
 
-  const { Type, value, extra } = selectedData;
+  const { TAG, type, extra } = selectedData;
 
   const index = blocks.findIndex(
     (block) => block.id === anchorEl.getAttribute("data-id")
@@ -18,7 +18,8 @@ export const handleClose = (
   const newItems = [...blocks];
   const selectedItem = { ...newItems[index] };
 
-  selectedItem.Type = Type;
+  selectedItem.TAG = TAG;
+  selectedItem.type = type;
   selectedItem.extra = extra;
   selectedItem.value = "";
   selectedItem.readyToDelete = true;
@@ -27,6 +28,7 @@ export const handleClose = (
 
   // reseting the value innerHTML (using Refs)
   anchorEl.innerHTML = "";
+  anchorEl.focus();
 
   setBlocks(newItems);
 };
