@@ -1,6 +1,6 @@
 import _uniqueId from "lodash/uniqueId";
 
-import { focuseByCursorPosition } from "../shared/helpers";
+import { focuseByCursorPosition, setCursorInfo } from "../shared/helpers";
 
 const ENTER_KEY = 13;
 const BACK_KEY = 8;
@@ -36,7 +36,9 @@ export const handleFocuse = (
   // we have a problem with uodating the state twice, react only takes the last update
   // so i'm working around it by setting all other blocks to !focused
   if (focused) {
+    // for the toolbar
     lastFocused.current = index;
+    // handling the focused state
     newBlocks = newBlocks.map((block) => {
       block.focused = block.id === selectedBlock.id;
 
@@ -82,12 +84,7 @@ export const handleKeyUp = (
   // end handle Change
 
   // set focused node and the cursor offset
-  const sel = window.getSelection();
-  const node = sel.anchorNode;
-  const offSet = sel.rangeCount > 0 ? sel.getRangeAt(0).startOffset : -1;
-
-  if (offSet !== -1) refs.current[index].cursorInfo = { node, offSet };
-  //
+  setCursorInfo(refs, index);
 
   switch (event.keyCode) {
     case ENTER_KEY:

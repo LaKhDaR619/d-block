@@ -1,6 +1,7 @@
 import React from "react";
 import "./editable.css";
 import { handleKeyDown, handleKeyUp } from "../block/handlers";
+import { setCursorInfo } from "../shared/helpers";
 
 function Editable({
   TAG,
@@ -26,6 +27,13 @@ function Editable({
     }
   };
 
+  const handleMouseUp = () => {
+    // force state update
+    const newBlocks = [...blocks];
+    setBlocks(newBlocks);
+    setCursorInfo(refs, index);
+  };
+
   return (
     <TAG
       ref={addRefs}
@@ -36,6 +44,7 @@ function Editable({
       className="block"
       contentEditable
       data-id={block.id}
+      onMouseUp={handleMouseUp}
     ></TAG>
   );
 }

@@ -1,10 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./toolbar.css";
 import FormatBoldIcon from "@material-ui/icons/FormatBold";
 import FormatItalicIcon from "@material-ui/icons/FormatItalic";
 import FormatUnderlinedIcon from "@material-ui/icons/FormatUnderlined";
-import FormatColorFillIcon from "@material-ui/icons/FormatColorFill";
-import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import ToggleButton from "@material-ui/lab/ToggleButton";
 import ToggleButtonGroup from "@material-ui/lab/ToggleButtonGroup";
 
@@ -21,18 +19,67 @@ const items = [
   FormatAlignRightIcon,
 ];
 
-function Toolbar({ el }) {
-  const [formats, setFormats] = useState(() => ["bold", "italic"]);
-  const [alignment, setAlignment] = useState(el?.style?.textAlign);
+const checkFormats = (parent, child) => {
+  const result = [];
+
+  let current_node = child?.parentElement;
+
+  if (!current_node) return;
+
+  while (current_node !== parent && current_node) {
+    console.log(parent);
+    console.log(current_node);
+
+    if (
+      ["b", "strong"].includes(current_node.tagName.toLowerCase()) ||
+      current_node.style.fontWeight === "bold"
+    )
+      result.push("bold");
+    if (["em", "i"].includes(current_node.tagName.toLowerCase()))
+      result.push("italic");
+    else if (current_node.tagName.toLowerCase() === "u")
+      result.push("underline");
+
+    current_node = current_node.parentElement;
+  }
+
+  return result;
+};
+
+function Toolbar({ el, focusedNode }) {
+  const [formats, setFormats] = useState(() => []);
+  const [alignment, setAlignment] = useState("left");
 
   const handleFormat = (event, newFormats) => {
+    // checking if the old formats needs to be set (if the format is removed we apply it)
+    formats.map((format) => {
+      if (!newFormats.includes(format)) document.execCommand(format);
+    });
+
+    // checking if the new formats needs to be set (if the format is added we apply it)
+    newFormats.map((format) => {
+      if (!formats.includes(format)) document.execCommand(format);
+    });
+
+    el.focus();
+
     setFormats(newFormats);
   };
 
   const handleAlignment = (event, newAlignment) => {
+    // setting the style
     el.style.textAlign = newAlignment;
+    el.focus();
+
     setAlignment(newAlignment);
   };
+
+  useEffect(() => {
+    console.log("checking formats");
+    console.log(focusedNode);
+    setFormats(checkFormats(el, focusedNode));
+    setAlignment(el?.style?.textAlign);
+  }, [el, focusedNode]);
 
   return (
     <div className="block-toolbar">
@@ -47,7 +94,7 @@ function Toolbar({ el }) {
         <ToggleButton value="italic" aria-label="italic">
           <FormatItalicIcon />
         </ToggleButton>
-        <ToggleButton value="underlined" aria-label="underlined">
+        <ToggleButton value="underline" aria-label="underline">
           <FormatUnderlinedIcon />
         </ToggleButton>
       </ToggleButtonGroup>

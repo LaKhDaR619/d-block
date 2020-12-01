@@ -32,7 +32,12 @@ function Block({
       onFocus={() => handleFocuse(index, true, blocks, setBlocks, lastFocused)}
       onBlur={() => handleFocuse(index, false, blocks, setBlocks, lastFocused)}
     >
-      {showToolbar ? <Toolbar el={refs?.current[index]?.el} /> : null}
+      {showToolbar ? (
+        <Toolbar
+          el={refs?.current[index]?.el}
+          focusedNode={refs?.current[index]?.cursorInfo.node}
+        />
+      ) : null}
       {block.value || block.extra ? (
         <IconButton size="small" className="iconButton">
           <MoreVertIcon />
