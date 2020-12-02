@@ -10,7 +10,7 @@ function MyMenu({ blocks, setBlocks, anchorEl, setAnchorEl }) {
     listItemStyle: { fontSize: 25, margin: "auto", paddingRight: 10 },
   };
 
-  const selectedData = { TAG: "p", type: "Paragraph", extra: null };
+  const selectedData = { TAG: "p", type: "Paragraph", extra: null, style: {} };
 
   const selectItem = (selectedData) => {
     handleClose(setAnchorEl, selectedData, blocks, setBlocks, anchorEl);
@@ -57,21 +57,36 @@ function MyMenu({ blocks, setBlocks, anchorEl, setAnchorEl }) {
       </MenuItem>
       <MenuItem
         onClick={() =>
-          selectItem({ ...selectedData, TAG: H1(), type: "Header" })
+          selectItem({
+            ...selectedData,
+            TAG: H1(),
+            type: "Header",
+            style: { fontWeight: "bold" },
+          })
         }
       >
         {H1()}
       </MenuItem>
       <MenuItem
         onClick={() =>
-          selectItem({ ...selectedData, TAG: H2(), type: "Header" })
+          selectItem({
+            ...selectedData,
+            TAG: H2(),
+            type: "Header",
+            style: { fontWeight: "bold" },
+          })
         }
       >
         {H2()}
       </MenuItem>
       <MenuItem
         onClick={() =>
-          selectItem({ ...selectedData, TAG: H3(), type: "Header" })
+          selectItem({
+            ...selectedData,
+            TAG: H3(),
+            type: "Header",
+            style: { fontWeight: "bold" },
+          })
         }
       >
         {H3()}

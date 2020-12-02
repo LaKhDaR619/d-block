@@ -56,6 +56,7 @@ export const addSlash = (index, blocks, setBlocks, refs, setAnchorEl) =>
   handleForwardSlashKey(index, blocks, setBlocks, refs, setAnchorEl, true);
 
 export const handleKeyDown = (event) => {
+  console.log(event.target.innerHTML);
   // so the browser doesn't add a <br />
   if ([13, 38, 40].includes(event.keyCode)) event.preventDefault();
 };
@@ -71,12 +72,16 @@ export const handleKeyUp = (
 ) => {
   event.preventDefault();
 
+  const target = event.target;
+
   // working as handleChange
   const newBlocks = [...blocks];
   const selectedBlock = { ...newBlocks[index] };
   // storing the Prev value so we allow for empty values
   const prev_value = selectedBlock.value;
-  selectedBlock.value = event.target.innerHTML;
+  // we empty the string if there is a br
+  if (target.innerHTML === "<br>") target.innerHTML = "";
+  selectedBlock.value = target.innerHTML;
   selectedBlock.readyToDelete = false;
   newBlocks[index] = selectedBlock;
 
@@ -148,7 +153,7 @@ const handleEnterKey = (index, blocks, setBlocks, refs) => {
     // if the type is a header we don't use it on the next block
     type: type === "Header" ? "Paragraph" : type,
     value: "",
-    style: "",
+    style: {},
     focused: true,
     readyToDelete: true,
     extra: extra,
@@ -169,7 +174,8 @@ const handleBackKey = (
   titleRef,
   prev_value
 ) => {
-  if (!["<br>", ""].includes(prev_value)) return;
+  // if the prev value is an empty string ('') we delete the block
+  if (prev_value) return;
 
   const newBlocks = [...blocks];
   const selectedBlock = { ...newBlocks[index] };
@@ -247,7 +253,6 @@ const handleUpArrowKey = (index, refs, titleRef) => {
 const handleDownArrowKey = (index, refs) => {
   if (index + 1 < refs.current.length) {
     const { node, offSet } = refs.current[index + 1].cursorInfo;
-    console.log(node, offSet);
     focuseByCursorPosition(node, offSet);
   }
 };

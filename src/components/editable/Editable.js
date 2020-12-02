@@ -11,6 +11,7 @@ function Editable({
   titleRef,
   refs,
   setAnchorEl,
+  forceBlockUpdate,
 }) {
   const block = blocks[index];
 
@@ -18,20 +19,22 @@ function Editable({
     const refAdded = refs.current.find((ref) => ref.el === el);
 
     if (el && !refAdded) {
+      console.log(el);
+      console.log(el.childNodes);
+
       // adding and focusing the new element
       el.focus();
       refs.current.splice(index, 0, {
         el,
-        cursorInfo: { node: el.childNodes[0], offSet: 0 },
+        cursorInfo: { node: el, offSet: 0 },
       });
     }
   };
 
   const handleMouseUp = () => {
-    // force state update
-    const newBlocks = [...blocks];
-    setBlocks(newBlocks);
     setCursorInfo(refs, index);
+    // forcing the block to update because changing the refs (HTML) doesn't update react controled components
+    forceBlockUpdate(Math.random);
   };
 
   return (
@@ -45,6 +48,7 @@ function Editable({
       contentEditable
       data-id={block.id}
       onMouseUp={handleMouseUp}
+      style={block.style}
     ></TAG>
   );
 }

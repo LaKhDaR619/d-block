@@ -5,7 +5,6 @@ import _uniqueId from "lodash/uniqueId";
 import Title from "../title";
 import Block from "../block";
 import MyMenu from "../menu";
-import Toolbar from "../Toolbar";
 
 export default function Editor() {
   const refs = useRef([]);
@@ -20,7 +19,7 @@ export default function Editor() {
       type: "Paragraph",
       TAG: "p",
       value: "",
-      style: "",
+      style: {},
       focused: true,
       readyToDelete: true,
       extra: null,
@@ -47,7 +46,7 @@ export default function Editor() {
       };
     });
 
-    setJson(JSON.stringify(temp));
+    setJson(temp);
   };
 
   return (
@@ -80,7 +79,7 @@ export default function Editor() {
       <button onClick={handleSave}>Save</button>
       <br />
       <br />
-      {json}
+      <div>{JSON.stringify(json, null, 2)}</div>
     </>
   );
 }

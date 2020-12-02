@@ -9,7 +9,7 @@ export const handleClose = (
   // if nothing is chosen
   if (!selectedData) return;
 
-  const { TAG, type, extra } = selectedData;
+  const { TAG, type, extra, style } = selectedData;
 
   const index = blocks.findIndex(
     (block) => block.id === anchorEl.getAttribute("data-id")
@@ -20,6 +20,7 @@ export const handleClose = (
 
   selectedItem.TAG = TAG;
   selectedItem.type = type;
+  selectedItem.style = style;
   selectedItem.extra = extra;
   selectedItem.value = "";
   selectedItem.readyToDelete = true;

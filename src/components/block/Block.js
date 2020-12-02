@@ -1,3 +1,4 @@
+import { useState } from "react";
 import "./block.css";
 
 import { IconButton } from "@material-ui/core";
@@ -17,6 +18,9 @@ function Block({
   setAnchorEl,
   lastFocused,
 }) {
+  // forcing the block to update (we put it here so the whole block updates (editable + toolbar))
+  const [_, forceBlockUpdate] = useState(0);
+
   const block = blocks[index];
 
   const addButtonStyle = {
@@ -60,6 +64,7 @@ function Block({
         setBlocks={setBlocks}
         titleRef={titleRef}
         setAnchorEl={setAnchorEl}
+        forceBlockUpdate={forceBlockUpdate}
       />
     </div>
   );

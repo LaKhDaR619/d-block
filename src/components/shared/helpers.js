@@ -9,8 +9,8 @@ export const setCursorInfo = (refs, index) => {
   const node = sel.anchorNode;
   const offSet = sel.rangeCount > 0 ? sel.getRangeAt(0).startOffset : -1;
 
-  console.log(node);
-  console.log(refs.current[index].cursorInfo.node);
+  //console.log(`new Node: ${node}`);
+  //console.log(`old Node: ${refs.current[index].cursorInfo.node}`);
   if (offSet !== -1 && refs.current)
     refs.current[index].cursorInfo = { node, offSet };
 };
