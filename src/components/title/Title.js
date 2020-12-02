@@ -31,7 +31,7 @@ function Title({ title, setTitle, titleRef, refs }) {
       className="title"
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}
-      //contentEditable
+      contentEditable
     >
       Title
     </div>

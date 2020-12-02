@@ -24,7 +24,7 @@ function Block({
     pointerEvents: block.focused ? "auto" : "none",
   };
 
-  const showToolbar = lastFocused.current === index;
+  const showToolbar = block.focused;
 
   return (
     <div

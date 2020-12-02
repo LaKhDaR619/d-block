@@ -31,13 +31,20 @@ const checkFormats = (parent, child) => {
     console.log(current_node);
 
     if (
+      // checking the tag and the styles
       ["b", "strong"].includes(current_node.tagName.toLowerCase()) ||
       current_node.style.fontWeight === "bold"
     )
       result.push("bold");
-    if (["em", "i"].includes(current_node.tagName.toLowerCase()))
+    if (
+      ["em", "i"].includes(current_node.tagName.toLowerCase()) ||
+      current_node.style.fontStyle === "italic"
+    )
       result.push("italic");
-    else if (current_node.tagName.toLowerCase() === "u")
+    if (
+      current_node.tagName.toLowerCase() === "u" ||
+      current_node.style.textDecoration === "underline"
+    )
       result.push("underline");
 
     current_node = current_node.parentElement;
@@ -81,8 +88,12 @@ function Toolbar({ el, focusedNode }) {
     setAlignment(el?.style?.textAlign);
   }, [el, focusedNode]);
 
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+  };
+
   return (
-    <div className="block-toolbar">
+    <div className="block-toolbar" onMouseDownCapture={handleMouseDown}>
       <ToggleButtonGroup
         value={formats}
         onChange={handleFormat}
