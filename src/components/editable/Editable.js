@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useRef } from "react";
 import "./editable.css";
-import { handleKeyDown, handleKeyUp } from "../block/handlers";
-import { setCursorInfo } from "../shared/helpers";
+import { handleInput, handleKeyDown, handleKeyUp } from "./handlers";
 
 function Editable({
   TAG,
@@ -13,15 +12,15 @@ function Editable({
   setAnchorEl,
   forceBlockUpdate,
 }) {
+  const keyCodeRef = useRef(0);
+
   const block = blocks[index];
 
   const addRefs = (el) => {
     const refAdded = refs.current.find((ref) => ref.el === el);
 
     if (el && !refAdded) {
-      console.log(el);
-      console.log(el.childNodes);
-
+      el.innerHTML = block.value;
       // adding and focusing the new element
       el.focus();
       refs.current.splice(index, 0, {
@@ -32,24 +31,27 @@ function Editable({
   };
 
   const handleMouseUp = () => {
-    setCursorInfo(refs, index);
+    // setCursorInfo(refs, index);
     // forcing the block to update because changing the refs (HTML) doesn't update react controled components
-    forceBlockUpdate(Math.random);
+    forceBlockUpdate();
   };
 
   return (
     <TAG
-      ref={addRefs}
-      onKeyDown={handleKeyDown}
-      onKeyUp={(e) =>
-        handleKeyUp(index, e, blocks, setBlocks, titleRef, refs, setAnchorEl)
-      }
-      className="block"
-      contentEditable
       data-id={block.id}
-      onMouseUp={handleMouseUp}
+      contentEditable
+      suppressContentEditableWarning={true}
       style={block.style}
-    ></TAG>
+      className="block"
+      ref={addRefs}
+      onKeyDown={(e) =>
+        handleKeyDown(e, keyCodeRef, index, blocks, setBlocks, refs, titleRef)
+      }
+      onInput={(e) =>
+        handleInput(e, keyCodeRef, index, blocks, setBlocks, refs)
+      }
+      onMouseUp={handleMouseUp}
+    />
   );
 }
 

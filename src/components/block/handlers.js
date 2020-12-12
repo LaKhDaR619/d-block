@@ -1,34 +1,13 @@
-import _uniqueId from "lodash/uniqueId";
-
-import { focuseByCursorPosition, setCursorInfo } from "../shared/helpers";
-
-const ENTER_KEY = 13;
-const BACK_KEY = 8;
-const FORWARD_SLASH_KEY = 111;
-const UP_ARROW_KEY = 38;
-const DOWN_ARROW_KEY = 40;
-
-export const handleChange = (index, event, blocks, setBlocks) => {
-  const { value } = event.target;
-
-  // spreading the array and the object
-  const newBlocks = [...blocks];
-  const selectedBlock = { ...blocks[index] };
-
-  selectedBlock.value = value;
-  selectedBlock.readyToDelete = false;
-
-  newBlocks[index] = selectedBlock;
-
-  setBlocks(newBlocks);
-};
+import { handleForwardSlashKey } from "../editable/handlers";
+import { setCursorInfo } from "../shared/helpers";
 
 export const handleFocuse = (
   index,
   focused,
   blocks,
   setBlocks,
-  lastFocused
+  refs,
+  forceBlockUpdate
 ) => {
   let newBlocks = [...blocks];
   const selectedBlock = { ...blocks[index] };
@@ -36,8 +15,11 @@ export const handleFocuse = (
   // we have a problem with uodating the state twice, react only takes the last update
   // so i'm working around it by setting all other blocks to !focused
   if (focused) {
-    // for the toolbar
-    lastFocused.current = index;
+    // change the selection place
+    document.onselectionchange = function () {
+      setCursorInfo(refs, index);
+      forceBlockUpdate();
+    };
     // handling the focused state
     newBlocks = newBlocks.map((block) => {
       block.focused = block.id === selectedBlock.id;
@@ -47,6 +29,7 @@ export const handleFocuse = (
   } else {
     selectedBlock.focused = focused;
     newBlocks[index] = selectedBlock;
+    document.onselectionchange = null;
   }
 
   setBlocks(newBlocks);
@@ -54,205 +37,3 @@ export const handleFocuse = (
 
 export const addSlash = (index, blocks, setBlocks, refs, setAnchorEl) =>
   handleForwardSlashKey(index, blocks, setBlocks, refs, setAnchorEl, true);
-
-export const handleKeyDown = (event) => {
-  console.log(event.target.innerHTML);
-  // so the browser doesn't add a <br />
-  if ([13, 38, 40].includes(event.keyCode)) event.preventDefault();
-};
-
-export const handleKeyUp = (
-  index,
-  event,
-  blocks,
-  setBlocks,
-  titleRef,
-  refs,
-  setAnchorEl
-) => {
-  event.preventDefault();
-
-  const target = event.target;
-
-  // working as handleChange
-  const newBlocks = [...blocks];
-  const selectedBlock = { ...newBlocks[index] };
-  // storing the Prev value so we allow for empty values
-  const prev_value = selectedBlock.value;
-  // we empty the string if there is a br
-  if (target.innerHTML === "<br>") target.innerHTML = "";
-  selectedBlock.value = target.innerHTML;
-  selectedBlock.readyToDelete = false;
-  newBlocks[index] = selectedBlock;
-
-  setBlocks(newBlocks);
-  // end handle Change
-
-  // set focused node and the cursor offset
-  setCursorInfo(refs, index);
-
-  switch (event.keyCode) {
-    case ENTER_KEY:
-      handleEnterKey(index, newBlocks, setBlocks, refs);
-      break;
-    case BACK_KEY:
-      handleBackKey(index, newBlocks, setBlocks, refs, titleRef, prev_value);
-      break;
-    case FORWARD_SLASH_KEY:
-      handleForwardSlashKey(
-        index,
-        newBlocks,
-        setBlocks,
-        refs,
-        setAnchorEl,
-        false
-      );
-      break;
-    case UP_ARROW_KEY:
-      handleUpArrowKey(index, refs, titleRef);
-      break;
-    case DOWN_ARROW_KEY:
-      handleDownArrowKey(index, refs);
-      break;
-    default:
-      return;
-  }
-};
-
-// handling key Ups
-const handleEnterKey = (index, blocks, setBlocks, refs) => {
-  const newBlocks = [...blocks];
-  const selectedBlock = { ...newBlocks[index] };
-  let { value, extra, type } = selectedBlock;
-
-  // in case we have extra and the value is empty
-  // we don't add an item and just remove the extra and return
-  if (extra && !value) {
-    selectedBlock.extra = null;
-    newBlocks[index] = selectedBlock;
-    return setBlocks(newBlocks);
-  }
-
-  // if it's a numbered list we add to it
-  if (!isNaN(extra) && extra !== null) {
-    extra += 1;
-
-    // changing the rest of the numbered lists
-    for (let i = index + 1; i < newBlocks.length; i++) {
-      if (isNaN(newBlocks[i].extra) || newBlocks[i].extra === null) break;
-
-      if (i === index + 1) newBlocks[i].extra = newBlocks[i - 1].extra + 2;
-      else newBlocks[i].extra = newBlocks[i - 1].extra + 1;
-    }
-  }
-
-  // if we have a value, we add a new Block
-  const newInput = {
-    id: _uniqueId("prefix-"),
-    TAG: "p",
-    // if the type is a header we don't use it on the next block
-    type: type === "Header" ? "Paragraph" : type,
-    value: "",
-    style: {},
-    focused: true,
-    readyToDelete: true,
-    extra: extra,
-  };
-
-  selectedBlock.focused = false;
-  newBlocks[index] = selectedBlock;
-  newBlocks.splice(index + 1, 0, newInput);
-
-  setBlocks(newBlocks);
-};
-
-const handleBackKey = (
-  index,
-  blocks,
-  setBlocks,
-  refs,
-  titleRef,
-  prev_value
-) => {
-  // if the prev value is an empty string ('') we delete the block
-  if (prev_value) return;
-
-  const newBlocks = [...blocks];
-  const selectedBlock = { ...newBlocks[index] };
-  const { extra } = selectedBlock;
-
-  if (extra) {
-    selectedBlock.extra = null;
-    newBlocks[index] = selectedBlock;
-
-    setBlocks(newBlocks);
-    return;
-  }
-
-  // we always leave at least one item
-  if (newBlocks.length === 1) {
-    focuseByCursorPosition(
-      titleRef.current.childNodes[0],
-      titleRef.current.innerHTML.length
-    );
-    return;
-  }
-
-  // delete The Item
-  newBlocks.splice(index, 1);
-  // delete The Ref
-  refs.current.splice(index, 1);
-
-  // don't repeat the work, the same as pressing up key
-  handleUpArrowKey(index, refs, titleRef);
-
-  setBlocks(newBlocks);
-};
-
-const handleForwardSlashKey = (
-  index,
-  blocks,
-  setBlocks,
-  refs,
-  setAnchorEl,
-  ignorValue
-) => {
-  if (ignorValue) {
-    // if ignore value, that means we want to open the menu using the button
-    // we simply add a '/' and show the menu
-    const newItems = [...blocks];
-    const selectedItem = { ...newItems[index] };
-
-    selectedItem.value = "/";
-    newItems[index] = selectedItem;
-
-    // reseting the value innerHTML (using Refs)
-    refs.current[index].el.innerHTML = "/";
-
-    setBlocks(newItems);
-    setAnchorEl(refs.current[index].el);
-  } else {
-    // else if we came from the keyup function then we check the value
-    const { value } = blocks[index];
-    if (value === "/") setAnchorEl(refs.current[index].el);
-  }
-};
-
-const handleUpArrowKey = (index, refs, titleRef) => {
-  if (index === 0)
-    focuseByCursorPosition(
-      titleRef.current.childNodes[0],
-      titleRef.current.innerHTML.length
-    );
-  else
-    focuseByCursorPosition(
-      refs.current[index - 1].cursorInfo.node,
-      refs.current[index - 1].cursorInfo.offSet
-    );
-};
-const handleDownArrowKey = (index, refs) => {
-  if (index + 1 < refs.current.length) {
-    const { node, offSet } = refs.current[index + 1].cursorInfo;
-    focuseByCursorPosition(node, offSet);
-  }
-};

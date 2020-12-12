@@ -8,6 +8,7 @@ import AddIcon from "@material-ui/icons/Add";
 import { handleFocuse, addSlash } from "./handlers";
 import Editable from "../editable";
 import Toolbar from "../Toolbar";
+import { preventBlockFromLosingFocuse } from "../shared/helpers";
 
 function Block({
   index,
@@ -16,44 +17,46 @@ function Block({
   refs,
   titleRef,
   setAnchorEl,
-  lastFocused,
+  ...rest
 }) {
   // forcing the block to update (we put it here so the whole block updates (editable + toolbar))
-  const [_, forceBlockUpdate] = useState(0);
+  // the reason we need to render because we have half of the site handled using refs and changing refs
+  // doesn't update things like the toolbar that we are handling it using state
+  const [_, set_] = useState(0);
+
+  const forceBlockUpdate = () => set_(Math.random());
 
   const block = blocks[index];
 
-  const addButtonStyle = {
-    opacity: block.focused ? 1 : 0,
-    pointerEvents: block.focused ? "auto" : "none",
-  };
-
-  const showToolbar = block.focused;
+  const showToolbar = block.focused && block.value !== "";
+  const showAddButton =
+    block.focused && block.value === "" && !block.extra && block.TAG === "p";
 
   return (
     <div
       className="input-container"
-      onFocus={() => handleFocuse(index, true, blocks, setBlocks, lastFocused)}
-      onBlur={() => handleFocuse(index, false, blocks, setBlocks, lastFocused)}
+      onFocus={() =>
+        handleFocuse(index, true, blocks, setBlocks, refs, forceBlockUpdate)
+      }
+      onBlur={() => handleFocuse(index, false, blocks, setBlocks, refs)}
+      {...rest}
     >
       {showToolbar ? (
         <Toolbar
           el={refs?.current[index]?.el}
-          focusedNode={refs?.current[index]?.cursorInfo.node}
+          focusedNode={refs?.current[index]?.cursorInfo?.node}
         />
       ) : null}
-      {block.value || block.extra ? (
-        <IconButton size="small" className="iconButton">
-          <MoreVertIcon />
-        </IconButton>
-      ) : (
+      {showAddButton ? (
         <IconButton
           size="small"
-          style={addButtonStyle}
           onClick={() => addSlash(index, blocks, setBlocks, refs, setAnchorEl)}
+          onMouseDownCapture={preventBlockFromLosingFocuse}
         >
           <AddIcon />
         </IconButton>
+      ) : (
+        <div style={{ width: 30 }} />
       )}
       <div style={{ margin: "auto", paddingRight: 10 }}>{block.extra}</div>
       <Editable

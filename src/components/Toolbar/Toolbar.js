@@ -11,6 +11,7 @@ import FormatUnderlinedIcon from "@material-ui/icons/FormatUnderlined";
 import FormatAlignLeftIcon from "@material-ui/icons/FormatAlignLeft";
 import FormatAlignCenterIcon from "@material-ui/icons/FormatAlignCenter";
 import FormatAlignRightIcon from "@material-ui/icons/FormatAlignRight";
+import { preventBlockFromLosingFocuse } from "../shared/helpers";
 
 const formatData = [
   { label: "bold", icon: FormatBoldIcon },
@@ -25,8 +26,6 @@ const alignmentData = [
 ];
 
 const checkFormats = (parent, child) => {
-  console.log("checkFormats");
-
   const result = [];
   let current_node = child;
 
@@ -50,9 +49,9 @@ const checkFormats = (parent, child) => {
     )
       result.push("underline");
 
-    current_node = current_node.parentElement;
+    current_node = current_node?.parentElement;
 
-    if (current_node !== parent && current_node) break;
+    if (current_node !== parent && !current_node) break;
   }
 
   return result;
@@ -64,12 +63,12 @@ function Toolbar({ el, focusedNode }) {
 
   const handleFormat = (event, newFormats) => {
     // checking if the old formats needs to be set (if the format is removed we apply it)
-    formats?.map((format) => {
+    formats?.forEach((format) => {
       if (!newFormats.includes(format)) document.execCommand(format);
     });
 
     // checking if the new formats needs to be set (if the format is added we apply it)
-    newFormats?.map((format) => {
+    newFormats?.forEach((format) => {
       if (!formats.includes(format)) document.execCommand(format);
     });
 
@@ -90,19 +89,22 @@ function Toolbar({ el, focusedNode }) {
     setAlignment(el?.style?.textAlign);
   }, [el, focusedNode]);
 
-  const handleMouseDown = (e) => {
-    e.preventDefault();
-  };
-
   return (
-    <div className="block-toolbar" onMouseDownCapture={handleMouseDown}>
+    <div
+      className="block-toolbar"
+      onMouseDownCapture={preventBlockFromLosingFocuse}
+    >
       <ToggleButtonGroup
         value={formats}
         onChange={handleFormat}
         aria-label="text formatting"
       >
         {formatData.map((data) => (
-          <ToggleButton value={data.label} aria-label={data.label}>
+          <ToggleButton
+            key={data.label}
+            value={data.label}
+            aria-label={data.label}
+          >
             <data.icon />
           </ToggleButton>
         ))}
@@ -114,7 +116,11 @@ function Toolbar({ el, focusedNode }) {
         aria-label="text alignment"
       >
         {alignmentData.map((data) => (
-          <ToggleButton value={data.label} aria-label={data.label}>
+          <ToggleButton
+            key={data.label}
+            value={data.label}
+            aria-label={data.label}
+          >
             <data.icon />
           </ToggleButton>
         ))}

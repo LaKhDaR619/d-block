@@ -1,12 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 
 import _uniqueId from "lodash/uniqueId";
 
 import Title from "../title";
 import Block from "../block";
 import MyMenu from "../menu";
+import { setCursorInfo } from "../shared/helpers";
 
-export default function Editor() {
+function Editor() {
   const refs = useRef([]);
   const titleRef = useRef();
   // menu
@@ -25,13 +26,6 @@ export default function Editor() {
       extra: null,
     },
   ]);
-
-  // so we can show the toolbar in the last focused block
-  const lastFocused = useRef(0);
-
-  useEffect(() => {
-    //console.log(info);
-  }, [blocks]);
 
   const [json, setJson] = useState("");
 
@@ -57,7 +51,6 @@ export default function Editor() {
         titleRef={titleRef}
         refs={refs}
       />
-
       {blocks.map((item, index) => (
         <Block
           key={item.id}
@@ -67,9 +60,9 @@ export default function Editor() {
           refs={refs}
           titleRef={titleRef}
           setAnchorEl={setAnchorEl}
-          lastFocused={lastFocused}
         />
       ))}
+
       <MyMenu
         blocks={blocks}
         setBlocks={setBlocks}
@@ -83,3 +76,5 @@ export default function Editor() {
     </>
   );
 }
+
+export default Editor;

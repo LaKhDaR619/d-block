@@ -1,12 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { focuseByCursorPosition } from "../shared/helpers";
 import "./title.css";
 
 function Title({ title, setTitle, titleRef, refs }) {
-  useEffect(() => {
-    //console.log(title);
-  });
-
   const handleKeyDown = (event) => {
     if ([13, 40].includes(event.keyCode)) event.preventDefault();
   };
@@ -21,20 +17,20 @@ function Title({ title, setTitle, titleRef, refs }) {
       const { node, offSet } = refs.current[0].cursorInfo;
 
       focuseByCursorPosition(node, offSet);
-      console.log(offSet);
     }
   };
 
   return (
-    <div
+    <h1
       ref={titleRef}
       className="title"
+      suppressContentEditableWarning={true}
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}
       contentEditable
     >
       Title
-    </div>
+    </h1>
   );
 }
 
