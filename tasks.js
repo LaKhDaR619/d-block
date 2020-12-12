@@ -1,4 +1,5 @@
 /*  
-    1- make numbered list dynamic during adding and deleting
+    1- fix numbered lists
+    2- fix forward slash shit
     2- style it
  */

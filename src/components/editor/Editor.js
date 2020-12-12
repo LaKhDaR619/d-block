@@ -5,7 +5,6 @@ import _uniqueId from "lodash/uniqueId";
 import Title from "../title";
 import Block from "../block";
 import MyMenu from "../menu";
-import { setCursorInfo } from "../shared/helpers";
 
 function Editor() {
   const refs = useRef([]);
@@ -62,7 +61,6 @@ function Editor() {
           setAnchorEl={setAnchorEl}
         />
       ))}
-
       <MyMenu
         blocks={blocks}
         setBlocks={setBlocks}

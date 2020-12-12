@@ -1,3 +1,5 @@
+import { isNumber, addingToNumberedList } from "../shared/helpers";
+
 export const handleClose = (
   setAnchorEl,
   selectedData,
@@ -15,21 +17,26 @@ export const handleClose = (
     (block) => block.id === anchorEl.getAttribute("data-id")
   );
 
-  const newItems = [...blocks];
-  const selectedItem = { ...newItems[index] };
+  let newBlocks = [...blocks];
+  const selectedBlock = { ...newBlocks[index] };
 
-  selectedItem.TAG = TAG;
-  selectedItem.type = type;
-  selectedItem.style = style;
-  selectedItem.extra = extra;
-  selectedItem.value = "";
-  selectedItem.readyToDelete = true;
+  selectedBlock.TAG = TAG;
+  selectedBlock.type = type;
+  selectedBlock.style = style;
+  selectedBlock.extra = extra;
+  selectedBlock.value = "";
+  selectedBlock.readyToDelete = true;
 
-  newItems[index] = selectedItem;
+  newBlocks[index] = selectedBlock;
 
   // reseting the value innerHTML (using Refs)
   anchorEl.innerHTML = "";
   anchorEl.focus();
 
-  setBlocks(newItems);
+  // checking the numbered lists
+  if (isNumber(extra)) {
+    newBlocks = addingToNumberedList(newBlocks, index, extra);
+  }
+
+  setBlocks(newBlocks);
 };

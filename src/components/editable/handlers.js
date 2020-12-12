@@ -1,6 +1,12 @@
 import _uniqueId from "lodash/uniqueId";
 
-import { focuseByCursorPosition, setCursorInfo } from "../shared/helpers";
+import {
+  focuseByCursorPosition,
+  isNumber,
+  setCursorInfo,
+  addingToNumberedList,
+  removingFromNumberedList,
+} from "../shared/helpers";
 import { getLastChildCursorInfo, syncStateWithRefs } from "./helpers";
 
 const ENTER_KEY = 13;
@@ -17,7 +23,7 @@ export const handleInput = (
   setBlocks,
   refs
 ) => {
-  //console.log("input");
+  console.log("input");
 
   const target = event.target;
   let value = "";
@@ -98,6 +104,16 @@ export const handleKeyDown = (
 
     const remaining_value = target.innerHTML;
 
+    // checking if the user isn't selecting multiple chars
+    // if the user selecting multiple chars and deleting we just return
+    const selectionRange = window.getSelection().getRangeAt(0);
+    if (
+      selectionRange?.startContainer !== selectionRange?.endContainer ||
+      selectionRange?.startOffset !== selectionRange?.endOffset
+    ) {
+      return;
+    }
+
     // checking if the focused node is the first node or one if it's children
     let shouldDelete = false;
 
@@ -122,9 +138,9 @@ export const handleKeyDown = (
   }
 };
 
-// handling key Ups (rename it)
+// handling block adding
 const handleAdd = (index, blocks, setBlocks, value, newValue) => {
-  const newBlocks = [...blocks];
+  let newBlocks = [...blocks];
   const selectedBlock = { ...newBlocks[index] };
   selectedBlock.value = value;
   let { extra, type } = selectedBlock;
@@ -134,22 +150,10 @@ const handleAdd = (index, blocks, setBlocks, value, newValue) => {
   if (extra && !value && !newValue) {
     selectedBlock.extra = null;
     newBlocks[index] = selectedBlock;
+
+    if (isNumber(extra)) newBlocks = removingFromNumberedList(newBlocks, index);
+
     return setBlocks(newBlocks);
-  }
-
-  // adding a new Block
-
-  // if it's a numbered list we add to it
-  if (!isNaN(extra) && extra !== null) {
-    extra += 1;
-
-    // changing the rest of the numbered lists
-    for (let i = index + 1; i < newBlocks.length; i++) {
-      if (isNaN(newBlocks[i].extra) || newBlocks[i].extra === null) break;
-
-      if (i === index + 1) newBlocks[i].extra = newBlocks[i - 1].extra + 2;
-      else newBlocks[i].extra = newBlocks[i - 1].extra + 1;
-    }
   }
 
   const newBlock = {
@@ -168,6 +172,9 @@ const handleAdd = (index, blocks, setBlocks, value, newValue) => {
   newBlocks[index] = selectedBlock;
   newBlocks.splice(index + 1, 0, newBlock);
 
+  // if it's a numbered list we add to it
+  if (isNumber(extra)) newBlocks = addingToNumberedList(newBlocks, index + 1);
+
   setBlocks(newBlocks);
 };
 
@@ -179,7 +186,7 @@ const handleDelete = (
   titleRef,
   remaining_value
 ) => {
-  const newBlocks = [...blocks];
+  let newBlocks = [...blocks];
   const selectedBlock = { ...newBlocks[index] };
   const { extra } = selectedBlock;
 
@@ -187,15 +194,30 @@ const handleDelete = (
     selectedBlock.extra = null;
     newBlocks[index] = selectedBlock;
 
+    if (isNumber(extra)) newBlocks = removingFromNumberedList(newBlocks, index);
+
     return setBlocks(newBlocks);
   }
 
-  // we always leave at least one item
-  if (newBlocks.length === 1) {
-    return focuseByCursorPosition(
+  // if we are in the first block
+  if (index === 0) {
+    // i had to put this first or the state won't update
+    focuseByCursorPosition(
       titleRef.current.childNodes[0],
       titleRef.current.innerHTML.length
     );
+
+    // we always leave at least one item
+    if (newBlocks.length !== 1 && newBlocks[index].value === "") {
+      // delete The Item and append the rest of the value
+      newBlocks.splice(index, 1);
+      // delete The Ref
+      refs.current.splice(index, 1);
+
+      return setBlocks(newBlocks);
+    }
+
+    return;
   }
 
   // delete The Item and append the rest of the value
@@ -212,10 +234,7 @@ const handleDelete = (
   // creating all the children
   temp_node.innerHTML = remaining_value;
 
-  console.log(temp_node.childNodes);
-
   // setting the focused node (if there is a first child we focuse it else we focuse the parent)
-
   let node, offSet;
 
   if (!temp_node.childNodes[0]) {
@@ -232,6 +251,10 @@ const handleDelete = (
   while (temp_node.childNodes.length > 0) {
     refs.current[index - 1].el.appendChild(temp_node.childNodes[0]);
   }
+
+  // checking the numbered list
+  if (isNumber(newBlocks[index - 1].extra))
+    newBlocks = addingToNumberedList(newBlocks, index - 1);
 
   // don't repeat the work, the same as pressing up key
   handleUpArrowKey(index, refs, titleRef);

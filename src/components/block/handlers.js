@@ -35,5 +35,6 @@ export const handleFocuse = (
   setBlocks(newBlocks);
 };
 
-export const addSlash = (index, blocks, setBlocks, refs, setAnchorEl) =>
+export const addSlash = (index, blocks, setBlocks, refs, setAnchorEl) => {
   handleForwardSlashKey(index, blocks, setBlocks, refs, setAnchorEl, true);
+};
